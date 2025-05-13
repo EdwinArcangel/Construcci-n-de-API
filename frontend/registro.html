@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es"> <!-- Establece el idioma principal del documento como español -->
+<head>
+  <meta charset="UTF-8"> <!-- Define la codificación de caracteres como UTF-8 -->
+  <title>Registro</title> <!-- Título de la pestaña del navegador -->
+</head>
+<body>
+  <h1>Registrarse</h1> <!-- Título principal en la página -->
+
+  <!-- Formulario de registro de usuario -->
+  <form id="registroForm">
+    <label>Usuario:
+      <input type="text" name="usuario" required> <!-- Campo de entrada para el nombre de usuario -->
+    </label><br><br>
+
+    <label>Clave:
+      <input type="password" name="clave" required> <!-- Campo de entrada para la clave (oculta) -->
+    </label><br><br>
+
+    <button type="submit">Registrar</button> <!-- Botón para enviar el formulario -->
+  </form>
+
+  <p id="respuesta" style="color: green;"></p> <!-- Elemento para mostrar la respuesta del servidor -->
+
+  <script>
+    // Obtener referencias al formulario y al párrafo de respuesta
+    const form = document.getElementById('registroForm');
+    const respuesta = document.getElementById('respuesta');
+
+    // Agregar un evento que se ejecuta al enviar el formulario
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault(); // Evita que la página se recargue al enviar el formulario
+
+      // Recoge los datos del formulario en un objeto
+      const datos = {
+        usuario: form.usuario.value,
+        clave: form.clave.value
+      };
+
+      // Realiza una solicitud POST a la API en /registro
+      const res = await fetch('http://localhost:4000/register', {
+        method: 'POST', // Método HTTP
+        headers: {
+          'Content-Type': 'application/json' // Indica que el contenido es JSON
+        },
+        body: JSON.stringify(datos) // Convierte el objeto JS a JSON para enviarlo
+      });
+
+      // Convierte la respuesta en texto
+      const texto = await res.text();
+
+      // Muestra el mensaje del servidor en la interfaz
+      respuesta.textContent = texto;
+      // Si la respuesta fue exitosa, el mensaje será verde, si no, rojo
+      respuesta.style.color = res.ok ? 'green' : 'red';
+    });
+  </script>
+</body>
+</html>
