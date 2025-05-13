@@ -86,6 +86,61 @@ app.post('/login', async (req, res) => {
     }
 });
 
+// Ruta para actualizar la contraseña del usuario
+app.put('/update', async (req, res) => {
+    const { usuario, nuevaClave } = req.body;
+
+    if (!usuario || !nuevaClave) {
+        return res.status(400).send('Usuario y nueva clave son obligatorios');
+    }
+
+    try {
+        // Encriptar nueva contraseña
+        const nuevaClaveEncriptada = await bcrypt.hash(nuevaClave, 10);
+
+        // Actualizar contraseña en la base de datos
+        const [resultado] = await connection.execute(
+            'UPDATE usuarios SET clave = ? WHERE usuario = ?',
+            [nuevaClaveEncriptada, usuario]
+        );
+
+        if (resultado.affectedRows === 0) {
+            return res.status(404).send('Usuario no encontrado');
+        }
+
+        res.status(200).send('Contraseña actualizada correctamente');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error en el servidor');
+    }
+});
+
+// Ruta para eliminar un usuario
+app.delete('/delete', async (req, res) => {
+    const { usuario } = req.body;
+
+    if (!usuario) {
+        return res.status(400).send('El nombre de usuario es obligatorio');
+    }
+
+    try {
+        const [resultado] = await connection.execute(
+            'DELETE FROM usuarios WHERE usuario = ?',
+            [usuario]
+        );
+
+        if (resultado.affectedRows === 0) {
+            return res.status(404).send('Usuario no encontrado');
+        }
+
+        res.status(200).send('Usuario eliminado correctamente');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error del servidor');
+    }
+});
+
+
 // Iniciar servidor
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
